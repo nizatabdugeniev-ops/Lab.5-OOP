@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Калькулятор среднего балла — JavaScript • DOM</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --accent: #38bdf8;
+      --accent-2: #22c55e;
+      --danger: #f87171;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background:
+        radial-gradient(circle at top right, #1d4ed8 0%, transparent 40%),
+        radial-gradient(circle at bottom left, #0ea5e9 0%, transparent 35%),
+        var(--bg);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .app {
+      width: min(520px, 100%);
+      background: color-mix(in srgb, var(--card) 92%, transparent);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(10px);
+    }
+
+    h1 { margin: 0 0 6px; font-size: 1.45rem; }
+
+    .subtitle {
+      margin: 0 0 22px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 110px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      background: #0b1220;
+      color: var(--text);
+      font-size: 1.05rem;
+      font-family: inherit;
+      outline: none;
+      resize: vertical;
+    }
+
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      margin: 14px 0 16px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      background: #0ea5e9;
+      color: white;
+    }
+
+    button.secondary { background: #334155; }
+    button:hover { filter: brightness(1.08); }
+
+    .result-box {
+      background: #0b1220;
+      border-radius: 14px;
+      padding: 16px;
+      min-height: 88px;
+    }
+
+    .result-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    #result {
+      font-size: 1.35rem;
+      font-weight: 700;
+      word-break: break-word;
+    }
+
+    #result.error { color: var(--danger); }
+    #result.ok { color: var(--accent-2); }
+
+    .hint {
+      margin-top: 14px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <h1>Калькулятор среднего балла</h1>
+    <p class="subtitle">JavaScript • DOM • несколько оценок</p>
+
+    <label for="grades">Оценки (через пробел, запятую или с новой строки)</label>
+    <textarea id="grades" placeholder="Например: 5, 4, 5, 3, 4"></textarea>
+
+    <div class="actions">
+      <button type="button" id="calcBtn">Посчитать среднее</button>
+      <button type="button" id="clearBtn" class="secondary">Очистить</button>
+    </div>
+
+    <div class="result-box">
+      <div class="result-label">Результат</div>
+      <div id="result">Введите оценки и нажмите «Посчитать среднее»</div>
+    </div>
+
+    <p class="hint">Среднее = сумма оценок / количество оценок. Результат выводится в элемент #result.</p>
+  </main>
+
+  <script>
+    const gradesInput = document.getElementById("grades");
+    const resultEl = document.getElementById("result");
+    const calcBtn = document.getElementById("calcBtn");
+    const clearBtn = document.getElementById("clearBtn");
+
+    function showResult(text, type) {
+      resultEl.textContent = text;
+      resultEl.classList.remove("ok", "error");
+      if (type) resultEl.classList.add(type);
+    }
+
+    function calculateAverage() {
+      const raw = gradesInput.value.trim();
+      if (!raw) {
+        showResult("Ошибка: введите хотя бы одну оценку.", "error");
+        return;
+      }
+
+      const parts = raw.split(/[\s,;]+/).filter(Boolean);
+      const grades = parts.map(Number);
+
+      if (grades.some((n) => Number.isNaN(n))) {
+        showResult("Ошибка: все значения должны быть числами.", "error");
+        return;
+      }
+
+      const sum = grades.reduce((acc, n) => acc + n, 0);
+      const avg = sum / grades.length;
+      const pretty = Number.isInteger(avg) ? String(avg) : avg.toFixed(2);
+
+      showResult(
+        `Оценок: ${grades.length}. Сумма: ${sum}. Средний балл: ${pretty}`,
+        "ok"
+      );
+    }
+
+    calcBtn.addEventListener("click", calculateAverage);
+    clearBtn.addEventListener("click", () => {
+      gradesInput.value = "";
+      showResult("Введите оценки и нажмите «Посчитать среднее»");
+      gradesInput.focus();
+    });
+  </script>
+</body>
+</html>
